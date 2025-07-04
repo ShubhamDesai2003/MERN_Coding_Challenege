@@ -11,7 +11,6 @@ const App = () => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
-  // const [perPage, setPerPage] = useState(5);
   const [transactions, setTransactions] = useState([]);
   const [totalTransactions, setTotalTransactions] = useState(0);
   const [statistics, setStatistics] = useState({});
@@ -20,53 +19,40 @@ const App = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-
       try {
         const transactionsRes = await axios.get(
           `http://localhost:4000/api/transactions?month=${month}&search=${search}&page=${page}&perPage=${perPage}`
         );
+
+        console.log(" Fetched transactions:", `http://localhost:4000/api/transactions?month=${month}&search=${search}&page=${page}&perPage=${perPage} data:`, transactionsRes.data.transactions);
+
         setTransactions(transactionsRes.data.transactions);
         setTotalTransactions(transactionsRes.data.total);
 
-        const combinedRes = await axios.get(
-          `http://localhost:4000/api/combined?month=${month}`
-        );
-        setStatistics(combinedRes.data.statistics);
-        setBarChartData(combinedRes.data.barChart);
-        setPieChartData(combinedRes.data.pieChart);
-
-        console.log("App.js: ", transactions);
+        // Fetch combined chart/statistics separately (non-blocking)
+        axios
+          .get(`http://localhost:4000/api/combined?month=${month}`)
+          .then((combinedRes) => {
+            setStatistics(combinedRes.data.statistics);
+            setBarChartData(combinedRes.data.barChart);
+            setPieChartData(combinedRes.data.pieChart);
+            console.log(" Combined data fetched.");
+          })
+          .catch((err) => {
+            console.error(" Error fetching combined data:", err);
+          });
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error(" Error fetching transactions:", error);
       }
     };
+
     fetchData();
   }, [month, search, page, perPage]);
 
   const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
   ];
-
-  // const initializeDb = async () => {
-  //   try {
-  //     await axios.get("http://localhost:4000/api/initialize");
-  //     alert("Database seeded!");
-  //   } catch (err) {
-  //     console.error("Init error", err);
-  //     alert("Failed to initialize DB");
-  //   }
-  // };
 
   return (
     <div className="container">
@@ -89,11 +75,6 @@ const App = () => {
         />
       </div>
 
-      {/* <div className="container">
-        <h1>Transaction Dashboard</h1>
-        <button onClick={initializeDb}>Seed Database</button>
-      </div> */}
-
       <TransactionTable
         transactions={transactions}
         page={page}
@@ -104,9 +85,7 @@ const App = () => {
       />
 
       <Statistics statistics={statistics} month={month} />
-
       <BarChart barChartData={barChartData} month={month} />
-
       <PieChart pieChartData={pieChartData} month={month} />
     </div>
   );

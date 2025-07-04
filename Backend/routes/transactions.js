@@ -13,28 +13,6 @@ function getMonthNumber(month) {
   return MONTHS[month];
 }
 
-// Initialize Database
-// router.get('/initialize', async (req, res) => {
-//   try {
-//     const response = await axios.get('https://s3.amazonaws.com/roxiler.com/product_transaction.json');
-//     const data = response.data;
-//     await Transaction.deleteMany({});
-//     await Transaction.insertMany(data.map(tx => ({
-//       id: tx.id,
-//       title: tx.product_title,
-//       description: tx.product_description,
-//       price: tx.price,
-//       category: tx.category,
-//       sold: tx.sold,
-//       image: tx.image,
-//       dateOfSale: new Date(tx.dateOfSale)
-//     })));
-//     res.send('Database initialized successfully');
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).send('Error initializing database');
-//   }
-// });
 
 router.get('/initialize', async (req, res) => {
   try {
@@ -63,37 +41,41 @@ router.get('/initialize', async (req, res) => {
 });
 
 
-
-// List Transactions
 router.get('/transactions', async (req, res) => {
   const { month, search = '', page = 1, perPage = 10 } = req.query;
   const monthNumber = getMonthNumber(month);
-  const query = {
-    $expr: { $eq: [{ $month: "$dateOfSale" }, monthNumber] },
+  const trimmedSearch = search.trim();
+
+  const monthFilter = { 
+    $expr: { $eq: [ { $month: "$dateOfSale" }, monthNumber ] } 
   };
 
-  if (search) {
+  let query = monthFilter;
+
+  if (trimmedSearch) {
+    const regex = new RegExp(trimmedSearch, 'i');
     const or = [
-      { title: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } }
+      { title:      { $regex: regex } },
+      { description:{ $regex: regex } },
+      { category:   { $regex: regex } } // include category
     ];
-    if (!isNaN(Number(search))) {
-      or.push({ price: Number(search) });
+    if (!isNaN(Number(trimmedSearch))) {
+      or.push({ price: Number(trimmedSearch) });
     }
-    query.$or = or;
+    query = { $and: [ monthFilter, { $or: or } ] };
   }
 
-  try {
-    const transactions = await Transaction.find(query)
-      .skip((page - 1) * perPage)
-      .limit(parseInt(perPage));
-    const total = await Transaction.countDocuments(query);
-    res.json({ transactions, total, page: parseInt(page), perPage: parseInt(perPage) });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error fetching transactions');
-  }
+  console.dir(query, { depth: null });
+
+  const transactions = await Transaction.find(query)
+    .skip((page - 1) * perPage)
+    .limit(parseInt(perPage));
+  const total = await Transaction.countDocuments(query);
+
+  res.json({ transactions, total, page: +page, perPage: +perPage });
 });
+
+
 
 // Statistics
 router.get('/statistics', async (req, res) => {

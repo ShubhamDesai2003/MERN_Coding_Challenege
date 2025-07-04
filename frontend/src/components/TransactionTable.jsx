@@ -1,6 +1,17 @@
-import React from 'react';
+import React, { useEffect } from "react";
 
-const TransactionTable = ({ transactions, page, perPage, totalTransactions, setPage, setPerPage }) => {
+const TransactionTable = ({
+  transactions,
+  page,
+  perPage,
+  totalTransactions,
+  setPage,
+  setPerPage,
+}) => {
+  useEffect(() => {
+    console.log("Rendering table with:", transactions);
+  }, [transactions]);
+
   return (
     <div>
       <h2>Transactions</h2>
@@ -16,18 +27,31 @@ const TransactionTable = ({ transactions, page, perPage, totalTransactions, setP
             <th>Image</th>
           </tr>
         </thead>
+        
         <tbody>
-          {transactions.map((t) => (
-            <tr key={t.id}>
-              <td>{t.id}</td>
-              <td>{t.title}</td>
-              <td>{t.description}</td>
-              <td>${t.price.toFixed(2)}</td>
-              <td>{t.category}</td>
-              <td>{t.sold ? 'Yes' : 'No'}</td>
-              <td><img src={t.image} alt={t.title} className="transaction-image" /></td>
+          {transactions.length === 0 ? (
+            <tr>
+              <td colSpan="7">No results found.</td>
             </tr>
-          ))}
+          ) : (
+            transactions.map((t) => (
+              <tr key={t.id}>
+                <td>{t.id}</td>
+                <td>{t.title}</td>
+                <td>{t.description}</td>
+                <td>${t.price?.toFixed(2)}</td>
+                <td>{t.category}</td>
+                <td>{t.sold ? "Yes" : "No"}</td>
+                <td>
+                  <img
+                    src={t.image}
+                    alt={t.title}
+                    className="transaction-image"
+                  />
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
 
