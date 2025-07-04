@@ -56,37 +56,52 @@ const App = () => {
 
   return (
     <div className="container">
-      <h1>Transaction Dashboard</h1>
-      <div className="controls">
-        <label>Select Month: </label>
-        <select value={month} onChange={(e) => setMonth(e.target.value)}>
-          {months.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
-        <input
-          type="text"
-          placeholder="Search transactions"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="search-box"
-        />
-      </div>
+      <header className="header">
+        <h1>Transaction Dashboard</h1>
+        <div className="controls">
+          <div className="control-group">
+            <label>Select Month:</label>
+            <select value={month} onChange={e => setMonth(e.target.value)}>
+              {months.map(m => <option key={m} value={m}>{m}</option>)}
+            </select>
+          </div>
+          <div className="control-group">
+            <label>Search:</label>
+            <input
+              type="text"
+              placeholder="Search transactions"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+      </header>
 
-      <TransactionTable
-        transactions={transactions}
-        page={page}
-        perPage={perPage}
-        totalTransactions={totalTransactions}
-        setPage={setPage}
-        setPerPage={setPerPage}
-      />
+      <main className="main-content">
+        <section className="section table-section">
+          <TransactionTable
+            transactions={transactions}
+            page={page}
+            perPage={perPage}
+            totalTransactions={totalTransactions}
+            setPage={setPage}
+            setPerPage={setPerPage}
+          />
+        </section>
 
-      <Statistics statistics={statistics} month={month} />
-      <BarChart barChartData={barChartData} month={month} />
-      <PieChart pieChartData={pieChartData} month={month} />
+        <section className="section stats-section">
+          <Statistics statistics={statistics} month={month} />
+        </section>
+
+        <section className="section charts-section">
+          <div className="chart-wrapper">
+            <BarChart barChartData={barChartData} month={month} />
+          </div>
+          <div className="chart-wrapper">
+            <PieChart pieChartData={pieChartData} month={month} />
+          </div>
+        </section>
+      </main>
     </div>
   );
 };

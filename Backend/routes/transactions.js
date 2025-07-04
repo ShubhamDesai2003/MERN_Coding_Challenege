@@ -109,6 +109,8 @@ router.get('/statistics', async (req, res) => {
   }
 });
 
+
+
 // Bar Chart
 router.get('/bar-chart', async (req, res) => {
   const { month } = req.query;
