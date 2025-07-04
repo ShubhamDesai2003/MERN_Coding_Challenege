@@ -30,6 +30,7 @@ const TransactionTable = ({ transactions, page, perPage, totalTransactions, setP
           ))}
         </tbody>
       </table>
+
       <div className="pagination">
         <button
           onClick={() => setPage((p) => Math.max(p - 1, 1))}
@@ -37,16 +38,22 @@ const TransactionTable = ({ transactions, page, perPage, totalTransactions, setP
         >
           Previous
         </button>
+
         <span>Page {page}</span>
+
         <button
           onClick={() => setPage((p) => p + 1)}
           disabled={page * perPage >= totalTransactions}
         >
           Next
         </button>
+
         <select
           value={perPage}
-          onChange={(e) => setPerPage(e.target.value)}
+          onChange={(e) => {
+            setPage(1); // reset to first page when changing perPage
+            setPerPage(Number(e.target.value)); // convert to number
+          }}
         >
           <option value={10}>10</option>
           <option value={20}>20</option>
