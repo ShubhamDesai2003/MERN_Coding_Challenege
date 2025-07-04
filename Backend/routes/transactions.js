@@ -1,6 +1,6 @@
 const express = require('express');
 const axios = require('axios');
-const Transaction = require('./transaction');
+const Transaction = require('../../models/transaction');
 
 const router = express.Router();
 
